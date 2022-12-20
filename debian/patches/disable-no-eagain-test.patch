@@ -1,0 +1,131 @@
+From: Apollon Oikonomopoulos <apoikos@debian.org>
+Date: Mon, 20 Jan 2020 09:28:45 -0300
+Subject: Disable EAGAIN related tests
+
+These tests are probably too time-sensitive and yields different results across
+different kernels (seems to work reliably only on Linux).
+Forwarded: no
+Last-Update: 2020-02-19
+
+
+test
+---
+ test/connection_test.rb | 105 ------------------------------------------------
+ 1 file changed, 105 deletions(-)
+
+diff --git a/test/connection_test.rb b/test/connection_test.rb
+index 513d520..bd94e80 100644
+--- a/test/connection_test.rb
++++ b/test/connection_test.rb
+@@ -281,111 +281,6 @@ module ConnectionTests
+     end
+   end
+ 
+-  def test_recover_from_partial_write
+-    listen do |server|
+-      hiredis.connect("localhost", 6380)
+-
+-      # Find out send buffer size
+-      sndbuf = sockopt(hiredis.sock, Socket::SO_SNDBUF)
+-
+-      # Make request that saturates the send buffer
+-      hiredis.write(["x" * sndbuf])
+-
+-      # Flush and disconnect to signal EOF
+-      hiredis.flush
+-      hiredis.disconnect
+-
+-      # Compare to data received on the other end
+-      formatted = "*1\r\n$#{sndbuf}\r\n#{"x" * sndbuf}\r\n"
+-      assert formatted == server.read
+-    end
+-  end
+-
+-  #
+-  # This does not have consistent outcome for different operating systems...
+-  #
+-  # def test_eagain_on_write
+-  #   listen do |server|
+-  #     hiredis.connect("localhost", 6380)
+-  #     hiredis.timeout = 100_000
+-
+-  #     # Find out buffer sizes
+-  #     sndbuf = sockopt(hiredis.sock, Socket::SO_SNDBUF)
+-  #     rcvbuf = sockopt(hiredis.sock, Socket::SO_RCVBUF)
+-
+-  #     # Make request that fills both the remote receive buffer and the local
+-  #     # send buffer. This assumes that the size of the receive buffer on the
+-  #     # remote end is equal to our local receive buffer size.
+-  #     assert_raises Errno::EAGAIN do
+-  #       hiredis.write(["x" * rcvbuf * 2])
+-  #       hiredis.write(["x" * sndbuf * 2])
+-  #       hiredis.flush
+-  #     end
+-  #   end
+-  # end
+-
+-  def test_eagain_on_write_followed_by_remote_drain
+-    listen do |server|
+-      hiredis.connect("localhost", 6380)
+-      hiredis.timeout = 100_000
+-
+-      # Find out buffer sizes
+-      sndbuf = sockopt(hiredis.sock, Socket::SO_SNDBUF)
+-      rcvbuf = sockopt(hiredis.sock, Socket::SO_RCVBUF)
+-
+-      # This thread starts reading the server buffer after 50ms. This will
+-      # cause the local write to first return EAGAIN, wait for the socket to
+-      # become writable with select(2) and retry.
+-      begin
+-        thread = Thread.new do
+-          sleep(0.050)
+-          loop do
+-            server.read(1024)
+-          end
+-        end
+-
+-        # Make request that fills both the remote receive buffer and the local
+-        # send buffer. This assumes that the size of the receive buffer on the
+-        # remote end is equal to our local receive buffer size.
+-        hiredis.write(["x" * rcvbuf])
+-        hiredis.write(["x" * sndbuf])
+-        hiredis.flush
+-        hiredis.disconnect
+-      ensure
+-        thread.kill
+-      end
+-    end
+-  end
+-
+-  def test_no_eagain_after_cumulative_wait_exceeds_timeout
+-    listen do |server|
+-      hiredis.connect("localhost", 6380)
+-      hiredis.timeout = 10_000
+-
+-      begin
+-        thread = Thread.new do
+-          loop do
+-            sleep(0.001)
+-            server.write("+ok\r\n")
+-          end
+-        end
+-
+-        # The read timeout for this connection is 10 milliseconds.
+-        # To compensate for the overhead of parsing the reply and the chance
+-        # not having to wait because the reply is already present in the OS
+-        # buffers, continue until we have waited at least 5x the timeout.
+-        waited = 0
+-        while waited < 50_000
+-          t1 = Time.now
+-          hiredis.read
+-          t2 = Time.now
+-          waited += (t2 - t1) * 1_000_000
+-        end
+-      ensure
+-        thread.kill
+-      end
+-    end
+-  end
+ end
+ 
+ if defined?(Hiredis::Ruby::Connection)

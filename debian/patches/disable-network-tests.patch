@@ -1,0 +1,75 @@
+From: Lucas Kanashiro <lucas.kanashiro@canonical.com>
+Date: Mon, 20 Jan 2020 09:31:35 -0300
+Subject: Disable network tests using routable IPs
+
+We disable two network tests using a routable IP address (1.1.1.1) to trigger
+a connection timeout. 1.1.1.1 is not guaranteed to be unroutable, and even in
+that case, connecting to it might yield different results (timeout, connection
+refused, host unreachable).
+
+Author: Apollon Oikonomopoulos <apoikos@debian.org>
+---
+ test/connection_test.rb | 43 -------------------------------------------
+ 1 file changed, 43 deletions(-)
+
+diff --git a/test/connection_test.rb b/test/connection_test.rb
+index 720ef9b..158f6ce 100644
+--- a/test/connection_test.rb
++++ b/test/connection_test.rb
+@@ -78,13 +78,6 @@ module ConnectionTests
+     thread.join
+   end
+ 
+-  def test_connect_wrong_host
+-    ex = assert_raises RuntimeError do
+-      hiredis.connect("nonexisting", 6379)
+-    end
+-    assert ex.message =~ /(can't resolve)|(name or service not known)|(nodename nor servname provided, or not known)/i
+-  end
+-
+   def test_connect_wrong_port
+     assert_raises Errno::ECONNREFUSED do
+       hiredis.connect("localhost", 6380)
+@@ -149,42 +142,6 @@ module ConnectionTests
+     end
+   end
+ 
+-  def test_connect_tcp_with_timeout
+-    hiredis.timeout = 200_000
+-
+-    t = Time.now
+-    assert_raises Errno::ETIMEDOUT do
+-      hiredis.connect("1.1.1.1", 59876)
+-    end
+-
+-    assert 210_000 > (Time.now - t)
+-  end
+-
+-  def test_connect_tcp_with_timeout_override
+-    hiredis.timeout = 1_000_000
+-
+-    t = Time.now
+-    assert_raises Errno::ETIMEDOUT do
+-      hiredis.connect("1.1.1.1", 59876, 200_000)
+-    end
+-
+-    assert 210_000 > (Time.now - t)
+-  end
+-
+-  def test_connect_tcp_without_timeout
+-    hiredis.timeout = 0
+-
+-    finished = false
+-    thread = Thread.new do
+-      hiredis.connect("1.1.1.1", 59876)
+-      finished = true
+-    end
+-
+-    sleep(0.5) # double of default timeout
+-    assert !finished
+-    thread.kill
+-  end
+-
+   def test_read_when_disconnected
+     assert_raises RuntimeError, "not connected" do
+       hiredis.read
