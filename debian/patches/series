@@ -2,3 +2,4 @@ use_system_libhiredis.patch
 disable-no-eagain-test.patch
 disable-network-tests.patch
 0004-Do-not-use-relative-path-in-test-helper.rb.patch
+0005-Skip-tests-failing-with-hiredis-1.2.0.patch

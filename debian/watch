@@ -1,2 +1,2 @@
-version=3
+version=4
 https://github.com/redis/hiredis-rb/tags .*/v(\d[\d\.]+).tar.gz

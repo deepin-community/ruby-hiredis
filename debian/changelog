@@ -1,8 +1,33 @@
-ruby-hiredis (0.6.3-deepin1) unstable; urgency=medium
+ruby-hiredis (0.6.3-3) unstable; urgency=medium
 
-  * Rebuild
+  * Team upload.
 
- -- Deepin Packages Builder <packages@deepin.org>  Fri, 11 Nov 2022 18:04:33 +0800
+  [ Debian Janitor ]
+  * Use secure copyright file specification URI.
+  * Bump debhelper from old 11 to 12.
+  * Set debhelper-compat version in Build-Depends.
+  * Set upstream metadata fields: Bug-Database, Bug-Submit, Repository,
+    Repository-Browse.
+  * Update standards version to 4.5.0, no changes needed.
+
+  [ Cédric Boutillier ]
+  * [ci skip] Update team name
+  * [ci skip] Add .gitattributes to keep unwanted files out of the source
+    package
+
+  [ Debian Janitor ]
+  * Update watch file format version to 4.
+  * Update standards version to 4.5.1, no changes needed.
+  * Bump debhelper from old 12 to 13.
+  * Update standards version to 4.6.1, no changes needed.
+  * Remove constraints unnecessary since buster (oldstable)
+
+  [ Lucas Kanashiro ]
+  * Add patch to skip tests failing with hiredis 1.2.0 (Closes: #1060173)
+  * Declare compliance with Debian Policy 4.6.2
+  * d/control: depend on ${ruby:Depends} instead of the ruby interpreter
+
+ -- Lucas Kanashiro <kanashiro@debian.org>  Tue, 06 Feb 2024 18:32:30 -0300
 
 ruby-hiredis (0.6.3-2) unstable; urgency=medium
 
