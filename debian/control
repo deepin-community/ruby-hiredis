@@ -1,13 +1,13 @@
 Source: ruby-hiredis
 Section: ruby
 Priority: optional
-Maintainer: Debian Ruby Extras Maintainers <pkg-ruby-extras-maintainers@lists.alioth.debian.org>
+Maintainer: Debian Ruby Team <pkg-ruby-extras-maintainers@lists.alioth.debian.org>
 Uploaders: Apollon Oikonomopoulos <apoikos@debian.org>
-Build-Depends: debhelper (>= 11),
+Build-Depends: debhelper-compat (= 13),
                gem2deb,
-               libhiredis-dev (>= 0.14.0),
+               libhiredis-dev,
                netcat-openbsd
-Standards-Version: 4.4.1
+Standards-Version: 4.6.2
 Vcs-Git: https://salsa.debian.org/ruby-team/ruby-hiredis.git
 Vcs-Browser: https://salsa.debian.org/ruby-team/ruby-hiredis
 Homepage: https://github.com/redis/hiredis-rb
@@ -16,7 +16,7 @@ Testsuite: autopkgtest-pkg-ruby
 
 Package: ruby-hiredis
 Architecture: any
-Depends: ruby | ruby-interpreter,
+Depends: ${ruby:Depends},
          ${misc:Depends},
          ${shlibs:Depends}
 Suggests: redis-server
