@@ -1,3 +1,10 @@
+ruby-hiredis (0.6.3-deepin2) unstable; urgency=medium
+
+  * Avoid downgrade.
+  * Rebuild against hiredis.
+
+ -- Tianyu Chen <sweetyfish@deepin.org>  Fri, 09 Aug 2024 10:45:23 +0800
+
 ruby-hiredis (0.6.3-3) unstable; urgency=medium
 
   * Team upload.
